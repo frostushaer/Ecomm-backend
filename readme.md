@@ -159,3 +159,152 @@ This is a full-featured modular backend for an e-commerce platform built with **
 - **CLOUDINARY_API_SECRET**
 - **RAZORPAY_KEY_ID**
 - **RAZORPAY_KEY_SECRET**
+
+# 📦 E-Commerce Platform - Database Design
+
+This document outlines the complete database design for an E-Commerce platform, using **PostgreSQL** and **Sequelize ORM**.
+
+---
+
+## 🧑 Users Table
+| Field      | Type       | Notes                    |
+|------------|------------|--------------------------|
+| id         | UUID (PK)  | Primary key              |
+| username   | STRING     | Unique, not null         |
+| email      | STRING     | Unique, not null         |
+| password   | STRING     | Hashed                   |
+| role       | ENUM       | 'user' or 'admin'        |
+| createdAt  | TIMESTAMP  |                          |
+| updatedAt  | TIMESTAMP  |                          |
+
+---
+
+## 📦 Products Table
+| Field        | Type       | Notes             |
+|--------------|------------|-------------------|
+| id           | UUID (PK)  | Primary key       |
+| name         | STRING     |                   |
+| description  | TEXT       |                   |
+| categoryId   | UUID (FK)  | FK to Category    |
+| price        | FLOAT      |                   |
+| stock        | INTEGER    |                   |
+| imageUrl     | STRING     | Cloudinary link   |
+| createdAt    | TIMESTAMP  |                   |
+| updatedAt    | TIMESTAMP  |                   |
+
+---
+
+## 🗂️ Categories Table
+| Field | Type      | Notes      |
+|-------|-----------|------------|
+| id    | UUID (PK) |            |
+| name  | STRING    | Unique     |
+
+---
+
+## 🛒 Cart Table
+| Field   | Type      | Notes               |
+|---------|-----------|---------------------|
+| id      | UUID (PK) |                     |
+| userId  | UUID (FK) | One-to-one with User|
+
+---
+
+## 🛍️ CartItems Table
+| Field     | Type      | Notes         |
+|-----------|-----------|---------------|
+| id        | UUID (PK) |               |
+| cartId    | UUID (FK) | Belongs to Cart|
+| productId | UUID (FK) | FK to Product |
+| quantity  | INTEGER   |               |
+
+---
+
+## ❤️ Wishlist Table
+| Field   | Type      | Notes               |
+|---------|-----------|---------------------|
+| id      | UUID (PK) |                     |
+| userId  | UUID (FK) | One-to-one with User|
+
+---
+
+## ⭐ WishlistItems Table
+| Field      | Type      | Notes         |
+|------------|-----------|---------------|
+| id         | UUID (PK) |               |
+| wishlistId | UUID (FK) | FK to Wishlist|
+| productId  | UUID (FK) | FK to Product |
+
+---
+
+## 📝 Reviews Table
+| Field     | Type      | Notes          |
+|-----------|-----------|----------------|
+| id        | UUID (PK) |                |
+| userId    | UUID (FK) | FK to User     |
+| productId | UUID (FK) | FK to Product  |
+| rating    | INTEGER   | 1–5 stars      |
+| comment   | TEXT      | Optional       |
+
+---
+
+## 📦 Orders Table
+| Field         | Type       | Notes                     |
+|---------------|------------|---------------------------|
+| id            | UUID (PK)  |                           |
+| userId        | UUID (FK)  | FK to User                |
+| status        | ENUM       | pending, paid, shipped... |
+| totalPrice    | FLOAT      |                           |
+| paymentStatus | ENUM       | pending, success, failed  |
+| createdAt     | TIMESTAMP  |                           |
+| updatedAt     | TIMESTAMP  |                           |
+
+---
+
+## 📦 OrderItems Table
+| Field     | Type      | Notes                          |
+|-----------|-----------|--------------------------------|
+| id        | UUID (PK) |                                |
+| orderId   | UUID (FK) | FK to Orders                   |
+| productId | UUID (FK) | FK to Product                  |
+| quantity  | INTEGER   |                                |
+| price     | FLOAT     | Price at time of order         |
+
+---
+
+## 🚚 ShippingDetails Table
+| Field       | Type       | Notes                         |
+|-------------|------------|-------------------------------|
+| id          | UUID (PK)  |                               |
+| orderId     | UUID (FK)  | One-to-one with Order         |
+| address     | TEXT       |                               |
+| city        | STRING     |                               |
+| postalCode  | STRING     |                               |
+| country     | STRING     |                               |
+| status      | ENUM       | pending, shipped, delivered   |
+
+---
+
+## 💳 Payments Table *(Optional)*
+| Field         | Type       | Notes                         |
+|---------------|------------|-------------------------------|
+| id            | UUID (PK)  |                               |
+| orderId       | UUID (FK)  | FK to Orders                  |
+| transactionId | STRING     | Razorpay/Stripe/etc.          |
+| amount        | FLOAT      |                               |
+| status        | ENUM       | success, failed, pending      |
+
+---
+
+## 🔗 RELATIONSHIPS
+- **User → Cart**: One-to-One
+- **User → Wishlist**: One-to-One
+- **User → Orders**: One-to-Many
+- **User → Reviews**: One-to-Many
+- **Cart → CartItems**: One-to-Many
+- **Wishlist → WishlistItems**: One-to-Many
+- **Order → OrderItems**: One-to-Many
+- **Order → ShippingDetails**: One-to-One
+- **Order → Payments**: One-to-One
+- **Product → Reviews / CartItems / OrderItems / WishlistItems**: One-to-Many
+
